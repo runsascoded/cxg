@@ -13,6 +13,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-plotly.js": "^2.6.0",
+    "use-local-storage-state": "^19.5.0",
     "use-session-storage-state": "^19.0.1"
   },
   "devDependencies": {

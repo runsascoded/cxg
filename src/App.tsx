@@ -1,8 +1,10 @@
 import './App.css'
 import censusData from '../public/census_tissue_hist.json'
 import Plot from 'react-plotly.js'
-import { useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import useSessionStorageState from "use-session-storage-state";
+import useLocalStorageState from "use-local-storage-state";
+
 const { log10, min, max } = Math
 
 export type Species = 'homo_sapiens' | 'mus_musculus'
@@ -78,8 +80,23 @@ function App() {
   )
   const range = [log10(nCells.reduce((a, b) => min(a, b))) - .4, log10(nCells.reduce((a, b) => max(a, b), 0)) + .5]
   const isPrimaryStr = PrimaryStrs.get(isPrimary)!
+  const [isDarkMode, setIsDarkMode] = useLocalStorageState<boolean | null>(
+    "isDarkMode",
+    { defaultValue: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches }
+  )
+  const color = useMemo(() => isDarkMode ? 'white' : 'black', [isDarkMode])
+  const bars = useMemo(() => isDarkMode ? '#fcba03' : '#1a70e8', [isDarkMode])
+  const gridcolor = useMemo(() => isDarkMode ? '#555' : '#ccc', [isDarkMode])
+  useEffect(() => {
+    console.log("isDarkMode:", isDarkMode)
+    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
+
   return (
     <>
+      <button className="scheme" onClick={() => setIsDarkMode(!isDarkMode)}>
+        {isDarkMode ? '☀️' : '🌘'}
+      </button>
       <h2>CELLxGENE Census Cell-Tissue Counts</h2>
       <p>
         <select
@@ -87,56 +104,76 @@ function App() {
           onChange={e => setCensus(e.target.value as Census)}
         >{
           CensusVersions.map(v => <option key={v} value={v}>{v}</option>)
-        }</select> census,
+        }</select>
+        &nbsp;
         <select
           value={species}
           onChange={e => setSpecies(e.target.value as Species)}
         >{
-          Species.map(v => <option key={v} value={v}>{unsnake(v)}</option>)
+          Species.map(v => <option key={v} value={v}>{{ 'mus_musculus': 'Mouse', 'homo_sapiens': 'Human', }[v]}</option>)
         }</select>
+        &nbsp;
         <select value={isPrimaryStr} onChange={e => setIsPrimary(e.target.value === 'All' ? null : e.target.value === 'Primary')
         }>
           <option value={"All"}>All</option>
           <option value={"Primary"}>Primary only</option>
           <option value={"Secondary"}>Secondary only</option>
         </select>
+        &nbsp; | {totalCells.toLocaleString()} cells
       </p>
-      <p>{totalCells.toLocaleString()} total cells</p>
+      {/*<p>{totalCells.toLocaleString()} total cells</p>*/}
       <div>
         <Plot
           data={[
             {
               type: 'bar',
+              name: '# Cells',
               x: nCells,
               y: hist.map(({ tissue }) => tissue),
               text: hist.map(({ n_cells }) => humanize(n_cells)),
+              textfont: { color, size: 10, },
+              // customdata:
               textposition: 'outside',
               orientation: 'h',
-              marker: {
-                color: 'blue',
-              }
+              hovertemplate: '%{y}: %{text}',
+              marker: { color: bars, }
             },
           ]}
           layout={{
             height: 900,
             width: 600,
-            margin: { l: 145, t: 10, b: 30, r: 10 },
+            bargap: .3,
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            margin: { l: 145, t: 10, b: 40, r: 10 },
             xaxis: {
               type: 'log',
               tickformat: '.0s',
               range,
-              title: { standoff: 20 },
+              gridcolor,
+              fixedrange: true,
+              tickfont: { color, },
+              title: {
+                // standoff: 40,
+                text: "# Cells",
+                font: { color, },
+              },
+              hoverformat: '',
             },
             yaxis: {
               dtick: 1,
+              hoverformat: '',
               ticksuffix: ' ',
               tickfont: {
+                color,
                 size: 10,
               },
             },
           }}
           config={{
+            // displaylogo: false,
             displayModeBar: false,
+            // displayModeBar: "hover",
           }}
         />
       </div>

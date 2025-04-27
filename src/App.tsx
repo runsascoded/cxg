@@ -79,7 +79,10 @@ function App() {
     },
     [species, census, isPrimary]
   )
-  const range = [log10(nCells.reduce((a, b) => min(a, b))) - .4, log10(nCells.reduce((a, b) => max(a, b), 0)) + .5]
+  const range = [
+    log10(nCells.reduce((a, b) => min(a, b))) - .4,
+    log10(nCells.reduce((a, b) => max(a, b))) + .5,
+  ]
   const isPrimaryStr = PrimaryStrs.get(isPrimary)!
   const [isDarkMode, setIsDarkMode] = useLocalStorageState<boolean | null>(
     "isDarkMode",
@@ -87,12 +90,18 @@ function App() {
   )
   const color = useMemo(() => isDarkMode ? 'white' : 'black', [isDarkMode])
   const bars = useMemo(() => isDarkMode ? '#646cff' : '#646cff', [isDarkMode])
-  const gridcolor = useMemo(() => isDarkMode ? '#555' : '#ccc', [isDarkMode])
+  const gridcolor = useMemo(() => isDarkMode ? '#555' : '#ddd', [isDarkMode])
   useEffect(() => {
     console.log("isDarkMode:", isDarkMode)
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
-
+  const y = hist.map(({ tissue }) => tissue)
+  const elideAt = 15
+  const ticktext = hist.map(({ tissue }) => {
+    const abbrev = tissue.length > elideAt + 1 ? (tissue.substring(0, elideAt) + '…') : tissue
+    return abbrev + ' '
+  })
+  const font = { color, size: 11, }
   return (
     <>
       <button className="scheme" onClick={() => setIsDarkMode(!isDarkMode)}>
@@ -125,58 +134,52 @@ function App() {
       <div className={"plot-div"}>
         <Plot
           className={"plot"}
-          data={[
-            {
-              type: 'bar',
-              name: '# Cells',
-              x: nCells,
-              y: hist.map(({ tissue }) => tissue),
-              text: hist.map(({ n_cells }) => humanize(n_cells)),
-              textfont: { color, size: 11, },
-              // customdata:
-              textposition: 'outside',
-              orientation: 'h',
-              hovertemplate: '%{y}: %{text}',
-              marker: { color: bars, }
-            },
-          ]}
+          data={[{
+            type: 'bar',
+            name: '# Cells',
+            x: nCells,
+            y,
+            customdata: y,
+            text: hist.map(({ n_cells }) => humanize(n_cells)),
+            textfont: font,
+            textposition: 'outside',
+            orientation: 'h',
+            hovertemplate: '%{customdata}: %{text}',
+            marker: { color: bars, }
+          }]}
           layout={{
             height: 15 * hist.length,
-            // width: 600,
             autosize: true,
-            bargap: .3,
+            bargap: .15,
             paper_bgcolor: 'transparent',
             plot_bgcolor: 'transparent',
-            margin: { l: 145, t: 10, b: 40, r: 10 },
+            margin: { l: 115, t: 10, b: 20, r: 10 },
             xaxis: {
               type: 'log',
               tickformat: '.0s',
+              dtick: 1,
               range,
               gridcolor,
               fixedrange: true,
-              tickfont: { color, },
+              tickfont: font,
               title: {
-                // standoff: 40,
-                text: "# Cells",
+                // text: "# Cells",
                 font: { color, },
               },
-              hoverformat: '',
             },
             yaxis: {
               dtick: 1,
-              hoverformat: '',
-              ticksuffix: ' ',
-              tickfont: {
-                color,
-                size: 10,
-              },
+              tickvals: hist.map((_, i) => i),
+              ticktext,
+              tickfont: font,
             },
           }}
+          useResizeHandler
           config={{
             responsive: true,
-            // displaylogo: false,
             displayModeBar: false,
-            // displayModeBar: "hover",
+            // displaylogo: false,
+            // modeBarButtons: [["toImage"]],
           }}
         />
       </div>

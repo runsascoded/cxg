@@ -4,6 +4,7 @@ import Plot from 'react-plotly.js'
 import { useEffect, useMemo } from "react";
 import useSessionStorageState from "use-session-storage-state";
 import useLocalStorageState from "use-local-storage-state";
+import { A } from "@rdub/base";
 
 const { log10, min, max } = Math
 
@@ -85,7 +86,7 @@ function App() {
     { defaultValue: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches }
   )
   const color = useMemo(() => isDarkMode ? 'white' : 'black', [isDarkMode])
-  const bars = useMemo(() => isDarkMode ? '#fcba03' : '#1a70e8', [isDarkMode])
+  const bars = useMemo(() => isDarkMode ? '#646cff' : '#646cff', [isDarkMode])
   const gridcolor = useMemo(() => isDarkMode ? '#555' : '#ccc', [isDarkMode])
   useEffect(() => {
     console.log("isDarkMode:", isDarkMode)
@@ -97,7 +98,7 @@ function App() {
       <button className="scheme" onClick={() => setIsDarkMode(!isDarkMode)}>
         {isDarkMode ? '☀️' : '🌘'}
       </button>
-      <h2>CELLxGENE Census Cell-Tissue Counts</h2>
+      <h2><A href={"https://chanzuckerberg.github.io/cellxgene-census/"}>CELLxGENE Census</A> Cell-Tissue Counts</h2>
       <p>
         <select
           value={census}
@@ -121,9 +122,9 @@ function App() {
         </select>
         &nbsp; | {totalCells.toLocaleString()} cells
       </p>
-      {/*<p>{totalCells.toLocaleString()} total cells</p>*/}
-      <div>
+      <div className={"plot-div"}>
         <Plot
+          className={"plot"}
           data={[
             {
               type: 'bar',
@@ -131,7 +132,7 @@ function App() {
               x: nCells,
               y: hist.map(({ tissue }) => tissue),
               text: hist.map(({ n_cells }) => humanize(n_cells)),
-              textfont: { color, size: 10, },
+              textfont: { color, size: 11, },
               // customdata:
               textposition: 'outside',
               orientation: 'h',
@@ -140,8 +141,9 @@ function App() {
             },
           ]}
           layout={{
-            height: 900,
-            width: 600,
+            height: 15 * hist.length,
+            // width: 600,
+            autosize: true,
             bargap: .3,
             paper_bgcolor: 'transparent',
             plot_bgcolor: 'transparent',
@@ -171,15 +173,13 @@ function App() {
             },
           }}
           config={{
+            responsive: true,
             // displaylogo: false,
             displayModeBar: false,
             // displayModeBar: "hover",
           }}
         />
       </div>
-      <p>
-
-      </p>
     </>
   )
 }

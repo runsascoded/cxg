@@ -2,12 +2,31 @@ import './App.css'
 import censusData from '../public/census_tissue_hist.json'
 import Plot from 'react-plotly.js'
 import { useMemo, useState } from "react";
+import useSessionStorageState from "use-session-storage-state";
 const { log10, min, max } = Math
 
 export type Species = 'homo_sapiens' | 'mus_musculus'
 export const Species = [ 'homo_sapiens', 'mus_musculus' ]
-export type Census = '2023-05-15' | '2024-07-01' | '2025-01-30'
-export const CensusVersions: Census[] = ['2023-05-15', '2024-07-01', '2025-01-30']
+export type Census =
+  | "2023-05-15"
+  | "2023-07-25"
+  | "2023-12-15"
+  | "2024-07-01"
+  | "2025-01-30"
+
+export const CensusVersions: Census[] = [
+  "2023-05-15",
+  "2023-07-25",
+  "2023-12-15",
+  "2024-07-01",
+  "2025-01-30",
+]
+
+export const PrimaryStrs = new Map<boolean | null, string>([
+  [null, 'All'],
+  [true, 'Primary'],
+  [false, 'Secondary'],
+]);
 
 function humanize(num: number): string {
   if (num >= 1e6) {
@@ -25,13 +44,12 @@ function titleCase(s: string): string {
 
 function unsnake(s: string): string {
   return s.replace('_', ' ')
-  // return s.split(/[_ ]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
 }
 
 function App() {
-  const [ species, setSpecies ] = useState<Species>('homo_sapiens')
-  const [ census, setCensus ] = useState<Census>('2025-01-30')
-  const [ isPrimary, setIsPrimary ] = useState<boolean | null>(true)
+  const [ species, setSpecies ] = useSessionStorageState<Species>('species', { defaultValue: 'homo_sapiens' })
+  const [ census, setCensus ] = useSessionStorageState<Census>('census', { defaultValue: '2025-01-30' })
+  const [ isPrimary, setIsPrimary ] = useSessionStorageState<boolean | null>('isPrimary', { defaultValue: true })
   const { hist, nCells, totalCells, } = useMemo(
     () => {
       let hist = censusData.filter(
@@ -59,11 +77,7 @@ function App() {
     [species, census, isPrimary]
   )
   const range = [log10(nCells.reduce((a, b) => min(a, b))) - .4, log10(nCells.reduce((a, b) => max(a, b), 0)) + .5]
-  // console.log(censusData)
-  // const primary = isPrimary !== false
-  // const secondary = isPrimary !== true
-  const isPrimaryStr = { null: 'All', true: 'Primary', false: 'Secondary' }[isPrimary]
-  // console.log("primary:", primary, "secondary:", secondary, "isPrimary:", isPrimary)
+  const isPrimaryStr = PrimaryStrs.get(isPrimary)!
   return (
     <>
       <h2>CELLxGENE Census Cell-Tissue Counts</h2>
@@ -86,24 +100,8 @@ function App() {
           <option value={"Primary"}>Primary only</option>
           <option value={"Secondary"}>Secondary only</option>
         </select>
-        {/*<label>*/}
-        {/*  <input type={"checkbox"} checked={primary} onChange={e => {*/}
-        {/*    const primary = e.target.checked*/}
-        {/*    console.log("setting primary:", primary)*/}
-        {/*    setIsPrimary(primary && secondary ? null : primary)*/}
-        {/*  }}/>*/}
-        {/*  Primary*/}
-        {/*</label>*/}
-        {/*<label>*/}
-        {/*  <input type={"checkbox"} checked={secondary} onChange={e => {*/}
-        {/*    const secondary = e.target.checked*/}
-        {/*    console.log("setting secondary:", secondary)*/}
-        {/*    setIsPrimary(primary && secondary ? null : secondary)*/}
-        {/*  }}/>*/}
-        {/*  Secondary*/}
-        {/*</label>*/}
       </p>
-      <p>{totalCells} total cells</p>
+      <p>{totalCells.toLocaleString()} total cells</p>
       <div>
         <Plot
           data={[
@@ -136,7 +134,6 @@ function App() {
                 size: 10,
               },
             },
-            // title: { text: 'A Fancy Plot' },
           }}
           config={{
             displayModeBar: false,

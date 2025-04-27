@@ -1,29 +1,17 @@
-import './App.css'
 import censusData from '../public/census_tissue_hist.json'
 import Plot from 'react-plotly.js'
-import { useEffect, useMemo } from "react";
-import useSessionStorageState from "use-session-storage-state";
-import useLocalStorageState from "use-local-storage-state";
-import { A } from "@rdub/base";
+import { useEffect, useMemo } from "react"
+import useSessionStorageState from "use-session-storage-state"
+import useLocalStorageState from "use-local-storage-state"
+import { A, Arr } from "@rdub/base"
+import { humanize, titleCase } from "./utils.ts"
 
 const { log10, min, max } = Math
 
 export type Species = 'homo_sapiens' | 'mus_musculus'
 export const Species = [ 'homo_sapiens', 'mus_musculus' ]
-export type Census =
-  | "2023-05-15"
-  | "2023-07-25"
-  | "2023-12-15"
-  | "2024-07-01"
-  | "2025-01-30"
-
-export const CensusVersions: Census[] = [
-  "2023-05-15",
-  "2023-07-25",
-  "2023-12-15",
-  "2024-07-01",
-  "2025-01-30",
-]
+const CensusVersions = Arr(new Set(censusData.map(({ census }) => census)))
+CensusVersions.sort()
 
 export const PrimaryStrs = new Map<boolean | null, string>([
   [null, 'All'],
@@ -31,27 +19,9 @@ export const PrimaryStrs = new Map<boolean | null, string>([
   [false, 'Secondary'],
 ]);
 
-function humanize(num: number): string {
-  if (num >= 1e6) {
-    return `${(num / 1e6).toPrecision(3)}M`
-  } else if (num >= 1e3) {
-    return `${(num / 1e3).toPrecision(3)}k`
-  } else {
-    return `${num}`
-  }
-}
-
-function titleCase(s: string): string {
-  return s.split(/[_ ]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-}
-
-function unsnake(s: string): string {
-  return s.replace('_', ' ')
-}
-
 function App() {
   const [ species, setSpecies ] = useSessionStorageState<Species>('species', { defaultValue: 'homo_sapiens' })
-  const [ census, setCensus ] = useSessionStorageState<Census>('census', { defaultValue: '2025-01-30' })
+  const [ census, setCensus ] = useSessionStorageState<string>('census', { defaultValue: CensusVersions[CensusVersions.length - 1] })
   const [ isPrimary, setIsPrimary ] = useSessionStorageState<boolean | null>('isPrimary', { defaultValue: true })
   const { hist, nCells, totalCells, } = useMemo(
     () => {
@@ -77,7 +47,7 @@ function App() {
       const totalCells = nCells.reduce((a, b) => a + b, 0)
       return { hist, nCells, totalCells }
     },
-    [species, census, isPrimary]
+    [ species, census, isPrimary, ]
   )
   const range = [
     log10(nCells.reduce((a, b) => min(a, b))) - .4,
@@ -101,17 +71,18 @@ function App() {
     const abbrev = tissue.length > elideAt + 1 ? (tissue.substring(0, elideAt) + '…') : tissue
     return abbrev + ' '
   })
-  const font = { color, size: 11, }
+  const rowHeight = 18
+  const font = { color, size: 13, }
   return (
     <>
       <button className="scheme" onClick={() => setIsDarkMode(!isDarkMode)}>
         {isDarkMode ? '☀️' : '🌘'}
       </button>
-      <h2><A href={"https://chanzuckerberg.github.io/cellxgene-census/"}>CELLxGENE Census</A> Cell-Tissue Counts</h2>
+      <h1><A href={"https://chanzuckerberg.github.io/cellxgene-census/"}>CELLxGENE Census</A> Cell-Tissue Counts</h1>
       <p>
         <select
           value={census}
-          onChange={e => setCensus(e.target.value as Census)}
+          onChange={e => setCensus(e.target.value)}
         >{
           CensusVersions.map(v => <option key={v} value={v}>{v}</option>)
         }</select>
@@ -148,12 +119,12 @@ function App() {
             marker: { color: bars, }
           }]}
           layout={{
-            height: 15 * hist.length,
+            height: rowHeight * hist.length,
             autosize: true,
-            bargap: .15,
+            bargap: .2,
             paper_bgcolor: 'transparent',
             plot_bgcolor: 'transparent',
-            margin: { l: 115, t: 10, b: 20, r: 10 },
+            margin: { l: 125, t: 10, b: 20, r: 10 },
             xaxis: {
               type: 'log',
               tickformat: '.0s',

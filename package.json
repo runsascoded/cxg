@@ -10,9 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^7.0.2",
+    "@mui/styled-engine": "^7.0.2",
     "@rdub/base": "^0.8.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-icons": "^5.5.0",
     "react-plotly.js": "^2.6.0",
     "use-local-storage-state": "^19.5.0",
     "use-session-storage-state": "^19.0.1"

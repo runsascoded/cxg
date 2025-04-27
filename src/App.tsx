@@ -5,6 +5,10 @@ import useSessionStorageState from "use-session-storage-state"
 import useLocalStorageState from "use-local-storage-state"
 import { A, Arr } from "@rdub/base"
 import { humanize, titleCase } from "./utils.ts"
+import Tooltip from '@mui/material/Tooltip'
+import { FaGithub } from "react-icons/fa";
+import { GoGear } from "react-icons/go";
+import { MdOutlineDarkMode, MdOutlineLightMode } from "react-icons/md";
 
 const { log10, min, max } = Math
 
@@ -75,9 +79,39 @@ function App() {
   const font = { color, size: 13, }
   return (
     <>
-      <button className="scheme" onClick={() => setIsDarkMode(!isDarkMode)}>
-        {isDarkMode ? '☀️' : '🌘'}
-      </button>
+      <Tooltip
+        // arrow
+        // open
+        classes={{ tooltip: 'tt', }}
+        slotProps={{
+          popper: {
+            modifiers: [
+              {
+                name: "offset",
+                options: {
+                  offset: [0, -10],
+                },
+              },
+            ],
+          }
+        }}
+        title={
+          <div>
+            <button className={"tt-btn"}>
+              <A href={"https://github.com/runsascoded/cxg"}>
+                <FaGithub className={"gh-icon"} />
+              </A>
+            </button>
+            <button className={"tt-btn"} onClick={() => setIsDarkMode(!isDarkMode)}>
+              {isDarkMode ? <MdOutlineLightMode /> : <MdOutlineDarkMode />}
+            </button>
+          </div>
+        }
+      >
+        <button className="tt-btn settings" onClick={() => setIsDarkMode(!isDarkMode)}>
+          <GoGear />
+        </button>
+      </Tooltip>
       <h1><A href={"https://chanzuckerberg.github.io/cellxgene-census/"}>CELLxGENE Census</A> Cell-Tissue Counts</h1>
       <p>
         <select

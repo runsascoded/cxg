@@ -57,9 +57,8 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
-.scheme {
+.settings {
   position: fixed;
-  border: 1px solid;
   bottom: 1rem;
   right: 1rem;
 }
@@ -97,7 +96,29 @@ button:focus-visible {
   width: 100%;
 }
 .plot {
-  border: 1px solid var(--fg);
+  border: 1px solid;
   width: 100%;
   height: 100%;
+}
+.gh-icon {
+  font-size: 2rem;
+}
+.tt-btn {
+  font-size: 2rem;
+  width: 3.4rem;
+  margin: auto;
+  padding: 0.6rem 0.2rem 0.2rem;
+  vertical-align: middle;
+  a {
+    background-color: var(--bg);
+    color: var(--fg);
+  }
+  text-align: center;
+  aspect-ratio: 1 / 1;
+  margin-top: 9px;
+  display: block;
+  border: 1px solid;
+}
+.tt {
+  background-color: transparent !important;
 }

@@ -79,39 +79,6 @@ function App() {
   const font = { color, size: 13, }
   return (
     <>
-      <Tooltip
-        // arrow
-        // open
-        classes={{ tooltip: 'tt', }}
-        slotProps={{
-          popper: {
-            modifiers: [
-              {
-                name: "offset",
-                options: {
-                  offset: [0, -10],
-                },
-              },
-            ],
-          }
-        }}
-        title={
-          <div>
-            <button className={"tt-btn"}>
-              <A href={"https://github.com/runsascoded/cxg"}>
-                <FaGithub className={"gh-icon"} />
-              </A>
-            </button>
-            <button className={"tt-btn"} onClick={() => setIsDarkMode(!isDarkMode)}>
-              {isDarkMode ? <MdOutlineLightMode /> : <MdOutlineDarkMode />}
-            </button>
-          </div>
-        }
-      >
-        <button className="tt-btn settings" onClick={() => setIsDarkMode(!isDarkMode)}>
-          <GoGear />
-        </button>
-      </Tooltip>
       <h1><A href={"https://chanzuckerberg.github.io/cellxgene-census/"}>CELLxGENE Census</A> Cell-Tissue Counts</h1>
       <p>
         <select
@@ -188,6 +155,39 @@ function App() {
           }}
         />
       </div>
+      <Tooltip
+        // arrow
+        // open
+        classes={{ tooltip: 'tt', }}
+        slotProps={{
+          popper: {
+            modifiers: [
+              {
+                name: "offset",
+                options: {
+                  offset: [0, -10],
+                },
+              },
+            ],
+          }
+        }}
+        title={
+          <div>
+            <button className={"tt-btn"}>
+              <A href={"https://github.com/runsascoded/cxg"}>
+                <FaGithub className={"gh-icon"} />
+              </A>
+            </button>
+            <button className={"tt-btn"} onClick={() => setIsDarkMode(!isDarkMode)}>
+              {isDarkMode ? <MdOutlineLightMode /> : <MdOutlineDarkMode />}
+            </button>
+          </div>
+        }
+      >
+        <button className="tt-btn settings" onClick={() => setIsDarkMode(!isDarkMode)}>
+          <GoGear />
+        </button>
+      </Tooltip>
     </>
   )
 }
